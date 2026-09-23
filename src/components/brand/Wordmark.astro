@@ -1,0 +1,41 @@
+---
+import EyeMark from "./EyeMark.astro";
+import { identity } from "../../content/practice";
+import type { Locale } from "../../lib/i18n";
+
+/**
+ * The header and footer lockup: mark plus name, with the specialty line showing
+ * from `md` up. The name is set in the body sans rather than the display serif
+ * on purpose, because that is how the card sets it: the serif is the site's
+ * editorial voice, the sans is her identity.
+ */
+interface Props {
+  locale: Locale;
+  tone?: "dark" | "light";
+  /** the footer lockup runs larger and always shows the specialty line */
+  size?: "sm" | "lg";
+  class?: string;
+}
+
+const { locale, tone = "dark", size = "sm", class: className = "" } = Astro.props;
+
+const name = locale === "ar" ? identity.nameAr.value : identity.nameFr.value;
+const specialty = locale === "ar" ? identity.shortTitleAr.value : identity.shortTitleFr.value;
+
+const markSize = size === "lg" ? 48 : 38;
+const nameClass = size === "lg" ? "text-[1.15rem] md:text-[1.35rem]" : "text-[0.95rem] md:text-[1.02rem]";
+const nameColor = tone === "light" ? "text-cream" : "text-ink";
+const subColor = tone === "light" ? "text-sand-ink" : "text-bronze-deep";
+---
+
+<span class={`flex items-center gap-2.5 md:gap-3 ${className}`}>
+  <EyeMark size={markSize} tone={tone === "light" ? "mono" : "duo"} class="shrink-0" />
+  <span class="flex flex-col leading-none">
+    <span class={`font-semibold tracking-[0.005em] ${nameClass} ${nameColor}`}>{name}</span>
+    <span
+      class={`mt-1 text-[0.66rem] font-medium tracking-[0.1em] uppercase u-caps ${subColor} ${
+        size === "lg" ? "" : "hidden md:block"
+      }`}>{specialty}</span
+    >
+  </span>
+</span>

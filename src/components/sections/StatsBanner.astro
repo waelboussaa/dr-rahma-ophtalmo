@@ -1,0 +1,118 @@
+---
+import { ArrowUpRight } from "@lucide/astro";
+import { makeT, type Locale, type TranslationKey } from "../../lib/i18n";
+import { medtnHref } from "../../lib/links";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = makeT(locale);
+
+// A shared, explicit shape (rather than `as const` on a mixed-shape array,
+// which TypeScript would union into per-item literal types that .map can't
+// narrow) so item4's optional unitKey type-checks in the loop below.
+const stats: { valueKey: TranslationKey; labelKey: TranslationKey; unitKey?: TranslationKey }[] = [
+  { valueKey: "stats.item1.value", labelKey: "stats.item1.label" },
+  { valueKey: "stats.item2.value", labelKey: "stats.item2.label" },
+  { valueKey: "stats.item3.value", labelKey: "stats.item3.label" },
+  // item4 mixes digits ("7/6") with a unit word. In French the word ("j")
+  // sits inside the value string and that is fine - French is LTR end to
+  // end. In Arabic, letting the browser's bidi algorithm resolve digits next
+  // to "أيام" inside one string proved unreliable: the visual order of the
+  // digits and the word flipped differently depending on how the forced
+  // `dir` interacted with the surrounding text, across several rounds of
+  // testing. Arabic renders it as two independently isolated pieces instead,
+  // with markup order controlling the visual position directly - see below.
+  {
+    valueKey: "stats.item4.value",
+    labelKey: "stats.item4.label",
+    unitKey: locale === "ar" ? "stats.item4.unit" : undefined,
+  },
+];
+---
+
+<section class="section-y band-dark relative overflow-hidden">
+  {/* Mark's arc faint background accent */}
+  <svg
+    class="pointer-events-none absolute -bottom-[50%] start-[-10%] h-[180%] w-auto opacity-[0.06]"
+    viewBox="0 0 64 64"
+    fill="none"
+    aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg"
+    style="aspect-ratio: 1;"
+  >
+    <path
+      d="M54.55 40.21 A 24 24 0 1 1 54.55 23.79"
+      stroke="var(--color-bronze-light)"
+      stroke-width="0.55"
+      stroke-linecap="round"></path>
+  </svg>
+
+  <div class="wrap relative">
+    <div class="reveal flex flex-col items-center text-center">
+      <span class="inline-flex items-center gap-2 rounded-full border border-sand-ink/20 bg-ink-soft px-4 py-1 text-[0.82rem] font-semibold uppercase tracking-wider text-bronze-light">
+        {t("stats.eyebrow")}
+      </span>
+      <h2 class="h2 mt-4 max-w-[26ch] text-cream">{t("stats.title")}</h2>
+      <p class="lead mt-4 max-w-[54ch] text-sand-ink">{t("stats.lead")}</p>
+    </div>
+
+    {/* Four verified facts about the cabinet. Every value traces to docs/00-content-source.md. */}
+    <div class="reveal mt-14 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4" data-stats-grid>
+      {
+        stats.map((stat) => (
+          <div
+            class="relative flex flex-col justify-between rounded-plate border border-sand-ink/15 bg-ink-soft/70 p-8 text-center shadow-sm"
+            data-stat-card
+          >
+            <span
+              class="font-display block text-3xl font-semibold text-cream md:text-4xl lg:text-5xl"
+              data-stat-val={t(stat.valueKey)}
+            >
+              {stat.unitKey ? (
+                /* Two independently isolated pieces in a row whose direction
+                   is pinned, so the browser cannot re-run bidi resolution
+                   across them: markup order alone decides which one sits on
+                   which side, on every browser, every time. Digits come first
+                   in the markup (physically on the left, since the container
+                   direction is forced ltr); in Arabic's right-to-left reading
+                   order that puts the unit word "أيام" - physically on the
+                   right - first, with the digits read second. */
+                <span class="inline-flex items-baseline gap-[0.3em]" dir="ltr" style="unicode-bidi: isolate-override;">
+                  <bdi dir="ltr">{t(stat.valueKey)}</bdi>
+                  <bdi dir="rtl">{t(stat.unitKey)}</bdi>
+                </span>
+              ) : (
+                <bdi dir="ltr">{t(stat.valueKey)}</bdi>
+              )}
+            </span>
+            <p class="mt-4 text-[0.92rem] leading-relaxed text-sand-ink">
+              {t(stat.labelKey)}
+            </p>
+          </div>
+        ))
+      }
+    </div>
+
+    {/* Booking callout strip */}
+    <div class="reveal mt-12 flex flex-col items-center justify-between gap-5 rounded-plate border border-sand-ink/20 bg-ink-soft/90 p-6 sm:flex-row sm:px-10">
+      <p class="font-display text-[1.12rem] text-cream text-center sm:text-start">
+        {locale === "ar" ? "في خدمتكم للعناية بصحة أعينكم يوماً بعد يوم." : "À votre écoute pour préserver votre santé visuelle au quotidien."}
+      </p>
+      <a
+        href={medtnHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn-pill-icon-light shrink-0"
+      >
+        <span>{t("cta.book")}</span>
+        <span class="btn-icon-circle">
+          <ArrowUpRight size={14} aria-hidden="true" class="rtl:-scale-x-100 text-cream" />
+        </span>
+        <span class="sr-only">({t("a11y.newTab")})</span>
+      </a>
+    </div>
+  </div>
+</section>

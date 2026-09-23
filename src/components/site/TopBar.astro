@@ -1,0 +1,68 @@
+---
+import { Clock, MapPin, Phone, Eye } from "@lucide/astro";
+import { makeT, type Locale } from "../../lib/i18n";
+import { telHref, telDisplay } from "../../lib/links";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = makeT(locale);
+---
+
+<div class="hidden md:block border-b border-line/60 bg-sand/40 text-[0.82rem] text-ink-muted" data-topbar>
+  <div class="wrap flex items-center justify-between gap-6 py-2 sm:py-2.5">
+    {/* Left/Start info items */}
+    <div class="flex min-w-0 items-center gap-5 whitespace-nowrap lg:gap-6">
+      {/* Live availability, computed from the clock in motion.ts (Tunisia,
+          UTC+1, Mon-Sat 08:00-18:00). Hidden until that has run: the static
+          HTML used to say "open" at any hour, including with JS off. */}
+      <div class="inline-flex items-center gap-2 rounded-full bg-surface/80 px-2.5 py-0.5 border border-line/60 shadow-xs" data-clinic-status hidden>
+        <span class="relative flex h-2 w-2">
+          <span class="status-pulse absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="status-dot relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+        </span>
+        <span class="font-semibold text-[0.78rem] text-ink" data-status-text>
+        </span>
+      </div>
+
+      <div class="hidden items-center gap-2 lg:flex">
+        <Clock size={13} aria-hidden="true" class="shrink-0 text-bronze-deep" />
+        <span>{t("topbar.hours")}</span>
+      </div>
+
+      <div class="hidden items-center gap-2 xl:flex">
+        <MapPin size={13} aria-hidden="true" class="shrink-0 text-bronze-deep" />
+        <span>{t("topbar.address")}</span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <Phone size={13} aria-hidden="true" class="shrink-0 text-bronze-deep" />
+        <a
+          href={telHref}
+          class="font-medium text-ink transition-colors hover:text-bronze-deep"
+          data-copy-target={telDisplay}
+          title={locale === "ar" ? "اضغط للاتصال أو النسخ" : "Cliquez pour appeler"}
+        >
+          <bdi dir="ltr">{telDisplay}</bdi>
+        </a>
+      </div>
+    </div>
+
+    {/* End: the visual comfort settings. Booking lives in the header CTA
+        directly below; a second "Prendre RDV" 50px above it was noise. */}
+    <div class="flex shrink-0 items-center">
+      <button
+        type="button"
+        class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-line/80 bg-surface/90 px-3 py-1 text-[0.80rem] font-semibold text-ink shadow-2xs transition-all hover:border-bronze hover:bg-sand-soft active:scale-95"
+        data-a11y-trigger
+        aria-label={t("a11y.menuTitle")}
+      >
+        <Eye size={13} aria-hidden="true" class="text-bronze-deep" />
+        <span>{t("a11y.menuLabel")}</span>
+      </button>
+
+    </div>
+  </div>
+</div>

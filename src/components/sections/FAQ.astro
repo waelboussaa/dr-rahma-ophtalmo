@@ -1,0 +1,114 @@
+---
+import { Plus, MessageCircle, Phone, CircleQuestionMark } from "@lucide/astro";
+import { sections, makeT, type Locale } from "../../lib/i18n";
+import { telHref, whatsappHref } from "../../lib/links";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = makeT(locale);
+
+const faqCategories = [
+  { id: "all", label: t("faq.filter.all") },
+  { id: "consultation", label: t("faq.filter.consultation") },
+  { id: "surgery", label: t("faq.filter.surgery") },
+  { id: "cnam", label: t("faq.filter.cnam") },
+  { id: "pediatric", label: t("faq.filter.pediatric") },
+];
+
+const faqItems = [
+  { q: "faq.q1", a: "faq.a1", category: "surgery" },
+  { q: "faq.q2", a: "faq.a2", category: "surgery" },
+  { q: "faq.q3", a: "faq.a3", category: "cnam" },
+  { q: "faq.q4", a: "faq.a4", category: "consultation" },
+  { q: "faq.q5", a: "faq.a5", category: "consultation" },
+  { q: "faq.q6", a: "faq.a6", category: "pediatric" },
+] as const;
+---
+
+<section id={sections.faq} class="section-y bg-sand-soft/35 relative overflow-hidden">
+  <div class="wrap relative">
+    {/* Section Header */}
+    <div class="reveal flex flex-col items-center text-center">
+      <span class="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-1 text-[0.82rem] font-semibold uppercase tracking-wider text-bronze-deep shadow-sm">
+        <CircleQuestionMark size={14} aria-hidden="true" class="text-bronze" />
+        {t("faq.eyebrow")}
+      </span>
+      <h2 class="h2 mt-4 max-w-[24ch]">{t("faq.title")}</h2>
+      <p class="lead mt-4 max-w-[54ch] text-ink-muted">{t("faq.lead")}</p>
+    </div>
+
+    {/* Interactive Filter Pills */}
+    <div class="reveal mt-10 flex flex-wrap items-center justify-center gap-2" data-faq-filters>
+      {
+        faqCategories.map((cat, i) => (
+          <button
+            type="button"
+            class={`faq-filter-btn rounded-full px-4 py-2 text-[0.84rem] font-semibold transition-all duration-200 ${
+              i === 0
+                ? "bg-ink text-cream shadow-xs"
+                : "bg-surface border border-line text-ink hover:border-bronze hover:bg-sand-soft"
+            }`}
+            data-filter={cat.id}
+          >
+            {cat.label}
+          </button>
+        ))
+      }
+    </div>
+
+    {/* Questions List */}
+    <div class="reveal mx-auto mt-8 max-w-3xl flex flex-col gap-4" data-faq-list>
+      {
+        faqItems.map((item, idx) => (
+          <details
+            name="faq"
+            class="faq-item group rounded-plate border border-line bg-surface p-6 shadow-sm transition-all duration-300 open:border-bronze open:shadow-md"
+            data-category={item.category}
+            open={idx === 0}
+          >
+            <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-[1.12rem] font-semibold leading-snug text-ink select-none focus:outline-none">
+              <span class="text-start">{t(item.q)}</span>
+              <span class="faq-icon grid h-8 w-8 shrink-0 place-items-center rounded-full bg-sand-soft text-bronze-deep transition-transform duration-300 group-hover:bg-sand">
+                <Plus size={18} aria-hidden="true" />
+              </span>
+            </summary>
+            <div class="mt-4 border-t border-line/50 pt-4 text-start text-[0.93rem] leading-relaxed text-ink-muted">
+              <p class="max-w-[68ch]">{t(item.a)}</p>
+            </div>
+          </details>
+        ))
+      }
+    </div>
+
+    {/* Help card */}
+    <div class="reveal mx-auto mt-12 max-w-3xl flex flex-col items-center justify-between gap-5 rounded-2xl border border-line bg-surface p-6 sm:flex-row sm:px-8 shadow-xs">
+      <div>
+        <h3 class="font-display text-[1.05rem] font-semibold text-ink">
+          {t("faq.help.title")}
+        </h3>
+        <p class="mt-1 text-[0.86rem] text-ink-muted">
+          {t("faq.help.text")}
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2.5 shrink-0">
+        <a href={telHref} class="btn btn-ghost !px-3.5 !py-2 text-[0.84rem]">
+          <Phone size={15} aria-hidden="true" class="text-bronze-deep" />
+          <span>{t("cta.call")}</span>
+        </a>
+        <a
+          href={whatsappHref(t("wa.message"))}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn btn-primary !px-4 !py-2 text-[0.84rem]"
+        >
+          <MessageCircle size={15} aria-hidden="true" />
+          <span>{t("cta.whatsapp")}</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>

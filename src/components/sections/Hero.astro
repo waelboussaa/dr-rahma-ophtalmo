@@ -1,0 +1,139 @@
+---
+import { ArrowUpRight, MessageCircle, MapPin, BadgeCheck, ShieldCheck } from "@lucide/astro";
+import Portrait from "../site/Portrait.astro";
+import { makeT, type Locale } from "../../lib/i18n";
+import { medtnHref, whatsappHref } from "../../lib/links";
+import { identity } from "../../content/practice";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = makeT(locale);
+
+const name = locale === "ar" ? identity.nameAr.value : identity.nameFr.value;
+const title = locale === "ar" ? identity.titleAr.value : identity.titleFr.value;
+---
+
+<section id="hero" class="relative overflow-hidden pt-6 pb-12 sm:pt-8 md:pt-12 md:pb-20">
+  {/* The mark's arc, oversized background accent */}
+  <svg
+    class="pointer-events-none absolute bottom-[6%] end-[-38%] h-[44%] w-auto opacity-[0.11] md:bottom-auto md:-top-[20%] md:end-[-8%] md:h-[130%]"
+    viewBox="0 0 64 64"
+    fill="none"
+    aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg"
+    style="aspect-ratio: 1;"
+  >
+    <path
+      class="hero-arc"
+      d="M54.55 40.21 A 24 24 0 1 1 54.55 23.79"
+      stroke="var(--color-bronze)"
+      stroke-width="0.6"
+      stroke-linecap="round"
+      pathLength="100"
+      stroke-dasharray="100"></path>
+  </svg>
+
+  <div class="wrap relative">
+    <div class="grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
+      {/* Left/Text column */}
+      <div class="lg:col-span-7">
+        {/* Eyebrow badge matching drasiri.com */}
+        <div class="hero-step inline-flex items-center gap-2 rounded-full border border-line bg-surface/90 px-4 py-1.5 text-[0.84rem] font-semibold text-ink-muted shadow-sm backdrop-blur-sm" style="animation-delay:80ms">
+          <span class="h-2 w-2 rounded-full bg-bronze"></span>
+          <span>{t("hero.badge")}</span>
+        </div>
+
+        <h1 class="display hero-wipe mt-6 max-w-[16ch]" style="animation-delay:160ms">
+          {t("hero.title")}
+        </h1>
+
+        <p class="lead hero-step mt-6 max-w-[46ch] text-ink-muted" style="animation-delay:320ms">
+          {t("hero.lead")}
+        </p>
+
+        {/* Doctor name & specialty credential box */}
+        <div class="hero-step mt-8 rounded-plate border border-line/70 bg-sand-soft/50 p-5 ps-6 backdrop-blur-sm md:max-w-[42ch]" style="animation-delay:420ms">
+          <div class="flex items-center gap-2">
+            <BadgeCheck size={18} aria-hidden="true" class="shrink-0 text-bronze-deep" />
+            <p class="font-display text-[1.25rem] leading-snug text-ink md:text-[1.38rem]">{name}</p>
+          </div>
+          <p class="mt-1 text-[0.88rem] leading-relaxed text-ink-muted">{title}</p>
+        </div>
+
+        {/* Action buttons matching drasiri.com */}
+        <div
+          class="hero-step mt-8 flex flex-col gap-3.5 sm:flex-row sm:items-center"
+          style="animation-delay:500ms"
+        >
+          <a
+            href={medtnHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-pill-icon"
+          >
+            <span>{t("cta.book")}</span>
+            <span class="btn-icon-circle">
+              <ArrowUpRight size={16} aria-hidden="true" class="rtl:-scale-x-100 text-ink" />
+            </span>
+            <span class="sr-only">({t("a11y.newTab")})</span>
+          </a>
+
+          <a
+            href={whatsappHref(t("wa.message"))}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn-ghost"
+          >
+            <MessageCircle size={16} aria-hidden="true" class="text-bronze-deep" />
+            <span>{t("cta.whatsapp")}</span>
+          </a>
+        </div>
+
+        {/* Trust badge */}
+        <div class="hero-step mt-8 flex items-center gap-2 text-[0.84rem] text-ink-muted" style="animation-delay:580ms">
+          <ShieldCheck size={16} aria-hidden="true" class="shrink-0 text-bronze-deep" />
+          <span>{t("hero.trustBadge")}</span>
+        </div>
+      </div>
+
+      {/* Right/Visual column with floating badges and spinning orbital graphic */}
+      <div class="hero-step relative lg:col-span-5" style="animation-delay:260ms">
+        {/* Rotating orbital decoration from drasiri.com */}
+        <div class="pointer-events-none absolute -top-8 -end-8 h-32 w-32 animate-spin-slow opacity-25 overflow-hidden md:h-44 md:w-44" aria-hidden="true">
+          <svg viewBox="0 0 100 100" fill="none" class="h-full w-full stroke-bronze" stroke-width="1.2" stroke-dasharray="4 6">
+            <circle cx="50" cy="50" r="44" />
+          </svg>
+        </div>
+
+        <div class="relative mx-auto max-w-[22rem] lg:max-w-none">
+          <Portrait locale={locale} ratio="3/4" eager class="shadow-sm" />
+
+          {/* Floating Badge 1 (Top End Corner) */}
+          <div class="hidden sm:flex absolute -top-4 -start-3 z-10 items-center gap-2.5 rounded-plate border border-line bg-surface/95 px-4 py-2.5 shadow-md backdrop-blur-sm">
+            <div class="grid h-8 w-8 place-items-center rounded-full bg-sand text-bronze-deep">
+              <MapPin size={15} aria-hidden="true" />
+            </div>
+            <div class="leading-none">
+              <span class="block text-[0.82rem] font-bold text-ink">{t("hero.floatingBadge1")}</span>
+              <span class="mt-1 block text-[0.72rem] text-ink-muted">{t("hero.floatingBadge1Sub")}</span>
+            </div>
+          </div>
+
+          {/* Floating Badge 2 (Bottom Start Corner) */}
+          <div class="hidden sm:flex absolute -bottom-4 -end-3 z-10 items-center gap-2.5 rounded-plate border border-line bg-surface/95 px-4 py-2.5 shadow-md backdrop-blur-sm">
+            <div class="grid h-8 w-8 place-items-center rounded-full bg-sand text-bronze-deep">
+              <BadgeCheck size={16} aria-hidden="true" />
+            </div>
+            <div class="leading-none">
+              <span class="block text-[0.82rem] font-bold text-ink">{t("hero.floatingBadge2")}</span>
+              <span class="mt-1 block text-[0.72rem] text-ink-muted">{t("hero.floatingBadge2Sub")}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

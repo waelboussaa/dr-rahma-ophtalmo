@@ -1,0 +1,106 @@
+---
+import { ArrowUpRight, Phone, MessageCircle, CalendarCheck, ShieldCheck, Clock } from "@lucide/astro";
+import { sections, makeT, type Locale } from "../../lib/i18n";
+import { medtnHref, telHref, telDisplay, whatsappHref } from "../../lib/links";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = makeT(locale);
+---
+
+<section id={sections.booking} class="section-y bg-cream relative overflow-hidden">
+  <div class="wrap">
+    <div class="reveal rounded-3xl border border-line bg-surface p-8 sm:p-12 lg:p-16 shadow-md relative overflow-hidden">
+      {/* Background soft decorative gradient */}
+      <div class="pointer-events-none absolute -end-20 -top-20 h-72 w-72 rounded-full bg-sand/30 blur-2xl"></div>
+
+      <div class="grid items-center gap-10 lg:grid-cols-12 lg:gap-14 relative z-10 text-start">
+        {/* Left Column: Heading & Primary Conversion Action */}
+        <div class="lg:col-span-7">
+          <div class="inline-flex items-center gap-2 rounded-full bg-sand-soft px-3.5 py-1 text-[0.82rem] font-semibold text-bronze-deep">
+            <CalendarCheck size={15} aria-hidden="true" />
+            <span>{locale === "ar" ? "حجز فوري ومؤكد" : "Prise de rendez-vous en ligne"}</span>
+          </div>
+
+          <h2 class="display mt-5 text-ink leading-tight">
+            {t("booking.title")}
+          </h2>
+
+          <p class="lead mt-4 text-ink-muted max-w-[44ch]">
+            {t("booking.lead")}
+          </p>
+
+          <div class="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center">
+            <a
+              href={medtnHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-pill-icon min-h-[3.25rem] !px-6 text-[1rem]"
+            >
+              <span>{t("cta.bookMedtn")}</span>
+              <span class="btn-icon-circle !h-10 !w-10">
+                <ArrowUpRight size={18} aria-hidden="true" class="rtl:-scale-x-100 text-ink" />
+              </span>
+              <span class="sr-only">({t("a11y.newTab")})</span>
+            </a>
+          </div>
+
+          <p class="mt-4 text-[0.84rem] text-ink-muted flex items-center gap-2">
+            <ShieldCheck size={16} aria-hidden="true" class="text-bronze-deep shrink-0" />
+            <span>{t("booking.note")}</span>
+          </p>
+        </div>
+
+        {/* Right Column: Cabinet quick contact & availability */}
+        <div class="lg:col-span-5 flex flex-col gap-4 rounded-2xl border border-line/70 bg-sand-soft/50 p-6 sm:p-8 backdrop-blur-sm">
+          <div class="flex items-center gap-3">
+            <div class="grid h-10 w-10 place-items-center rounded-full bg-surface text-bronze-deep shadow-sm">
+              <Clock size={18} aria-hidden="true" />
+            </div>
+            <div>
+              <span class="block text-[0.82rem] font-bold uppercase tracking-wider text-bronze-deep">
+                {t("cabinet.hoursLabel")}
+              </span>
+              <span class="block text-[0.94rem] font-semibold text-ink">
+                {t("cabinet.hoursDays")} : <bdi dir="ltr">{t("cabinet.hoursTime")}</bdi>
+              </span>
+            </div>
+          </div>
+
+          <div class="border-t border-line/50 pt-4 flex flex-col gap-3">
+            <p class="text-[0.86rem] text-ink-muted">
+              {locale === "ar" ? "أو يمكنكم التواصل مباشرة مع العيادة:" : "Vous pouvez également joindre le cabinet directement :"}
+            </p>
+
+            <a
+              href={telHref}
+              class="inline-flex items-center justify-between rounded-xl border border-line bg-surface px-4 py-3 text-[0.92rem] font-semibold text-ink shadow-sm transition-all hover:border-bronze hover:bg-sand-soft"
+            >
+              <span class="inline-flex items-center gap-2">
+                <Phone size={16} aria-hidden="true" class="text-bronze-deep" />
+                <bdi dir="ltr">{telDisplay}</bdi>
+              </span>
+              <span class="text-[0.78rem] text-bronze-deep font-bold uppercase">{t("cta.call")}</span>
+            </a>
+
+            <a
+              href={whatsappHref(t("wa.message"))}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center justify-between rounded-xl border border-line bg-surface px-4 py-3 text-[0.92rem] font-semibold text-ink shadow-sm transition-all hover:border-bronze hover:bg-sand-soft"
+            >
+              <span class="inline-flex items-center gap-2">
+                <MessageCircle size={16} aria-hidden="true" class="text-bronze-deep" />
+                <span>WhatsApp</span>
+              </span>
+              <span class="text-[0.78rem] text-bronze-deep font-bold uppercase">{t("cta.whatsapp")}</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

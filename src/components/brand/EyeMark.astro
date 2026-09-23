@@ -1,0 +1,43 @@
+---
+/**
+ * The official clinic logo of Dr Rahma Saidane Bourogaa.
+ * Features the signature bronze brush arc, ink eye contour, hazel iris, and catchlight.
+ */
+interface Props {
+  size?: number;
+  tone?: "duo" | "mono";
+  class?: string;
+  /** Decorative by default: the mark always sits beside a text name. */
+  title?: string;
+}
+
+const { size = 40, tone = "duo", class: className = "", title } = Astro.props;
+---
+
+<span
+  class={`relative inline-flex shrink-0 items-center justify-center rounded-full select-none ${
+    tone === "mono" ? "bg-cream/15 p-1 ring-1 ring-sand-ink/20" : ""
+  } ${className}`}
+  style={`width: ${size}px; height: ${size}px;`}
+  role={title ? "img" : "presentation"}
+  aria-hidden={title ? undefined : "true"}
+  aria-label={title}
+>
+  {/* AVIF/WebP re-encoded straight from this same PNG (see build-brand.mjs),
+      not the stale public/brand/logo.webp from an earlier crop - that file
+      visibly softened the arc's fine strokes under a pixel diff, and this
+      mark is on screen, eager-loaded, on every single page. */}
+  <picture>
+    <source srcset="/brand/logo-clean.avif" type="image/avif" />
+    <source srcset="/brand/logo-clean.webp" type="image/webp" />
+    <img
+      src="/brand/logo-clean.png"
+      alt={title || "Logo Dr Rahma Saidane Bourogaa"}
+      width={size}
+      height={size}
+      class="h-full w-full object-contain pointer-events-none drop-shadow-xs"
+      loading="eager"
+      decoding="async"
+    />
+  </picture>
+</span>

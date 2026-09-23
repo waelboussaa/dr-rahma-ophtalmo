@@ -1,0 +1,58 @@
+---
+import { bcp47, localizedPath, locales, shortLabel, endonym, makeT, type Locale } from "../../lib/i18n";
+
+/**
+ * FR | العربية.
+ *
+ * Two real links, not a JavaScript menu, so the switch works with scripts
+ * blocked and so a search engine can follow both language versions. Each label
+ * is written in its own language (never "Arabic", always العربية), and carries
+ * `hreflang` plus a full-name accessible label, because "FR" read aloud is not
+ * a language name.
+ */
+interface Props {
+  locale: Locale;
+  pathname: string;
+  tone?: "dark" | "light";
+  class?: string;
+}
+
+const { locale, pathname, tone = "dark", class: className = "" } = Astro.props;
+const t = makeT(locale);
+
+const active = tone === "light" ? "text-cream" : "text-ink";
+const idle = tone === "light" ? "text-sand-ink hover:text-cream" : "text-ink-muted hover:text-ink";
+const divider = tone === "light" ? "bg-sand-ink/40" : "bg-line";
+---
+
+<div class={`flex items-center gap-2 text-[0.82rem] font-semibold ${className}`}>
+  <span class="sr-only" id="locale-switch-label">{t("a11y.language")}</span>
+  <ul class="flex items-center gap-2" aria-labelledby="locale-switch-label">
+    {
+      locales.map((l, i) => (
+        <li class="flex items-center gap-2">
+          {/* A drawn 1px rule, not a pipe character. A typed "|" inherits the
+              body font's own bar height and sits at whatever baseline offset
+              that face happens to give it, which is never the optical centre
+              of two labels beside it. */}
+          {i > 0 && <span aria-hidden="true" class={`h-3.5 w-px shrink-0 ${divider}`} />}
+          <a
+            href={localizedPath(pathname, l)}
+            hreflang={bcp47[l]}
+            lang={l}
+            aria-current={l === locale ? "true" : undefined}
+            class={`inline-flex min-w-9 items-center justify-center rounded-sm px-2 py-1.5 transition-colors ${
+              l === locale ? active : idle
+            }`}
+          >
+            {/* "FR" read aloud is not a language name, so the endonym is added
+                for screen readers. For Arabic the two are already identical,
+                and adding it would make the link announce "العربية العربية". */}
+            <span aria-hidden={shortLabel[l] === endonym[l] ? undefined : "true"}>{shortLabel[l]}</span>
+            {shortLabel[l] !== endonym[l] && <span class="sr-only">{endonym[l]}</span>}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>

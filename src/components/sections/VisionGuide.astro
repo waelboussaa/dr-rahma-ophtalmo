@@ -1,0 +1,291 @@
+---
+import { Eye, ScanEye, Aperture, Droplets, Baby, ArrowUpRight, Activity, CircleAlert, Phone } from "@lucide/astro";
+import { makeT, type Locale } from "../../lib/i18n";
+import { medtnHref, telHref, telDisplay } from "../../lib/links";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = makeT(locale);
+
+const conditions = [
+  {
+    id: "cataract",
+    icon: Aperture,
+    label: t("vision.tab.cataract"),
+    titleFr: "Baisse progressive de la vision & éblouissement",
+    titleAr: "تراجع تدريجي في الرؤية وانزعاج من الأضواء",
+    descFr: "La cataracte est une opacification du cristallin naturel de l'œil, fréquente avec l'âge. La vision devient voilée comme derrière une vitre dépolie.",
+    descAr: "الماء الأبيض هو تعتيم تدريجي في عدسة العين الطبيعية، ويشيع مع التقدم في العمر. تصبح الرؤية ضبابية كأنك تنظر من خلف زجاج مغشى.",
+    symptomsFr: [
+      "Vision floue ou voilée qui ne s'améliore pas avec les lunettes",
+      "Éblouissement gênant lors de la conduite nocturne",
+      "Couleurs qui semblent ternies ou jaunies",
+    ],
+    symptomsAr: [
+      "رؤية ضبابية أو معتمة لا تتحسن بالنظارات العادية",
+      "انزعاج وصعوبة من أضواء السيارات أثناء القيادة ليلاً",
+      "بهتان الألوان والميل نحو الاصفرار",
+    ],
+    examsFr: "Bilan biométrique pré-opératoire & choix de l'implant (monofocal ou multifocal)",
+    examsAr: "فحص قياس العدسة البيومتري واختيار العدسة المزروعة المناسبة",
+    badgeFr: "Chirurgie de la cataracte & implants",
+    badgeAr: "جراحة الماء الأبيض والعدسات المزروعة",
+  },
+  {
+    id: "refractive",
+    icon: ScanEye,
+    label: t("vision.tab.refractive"),
+    titleFr: "Difficulté à voir de loin ou de près sans lunettes",
+    titleAr: "صعوبة رؤية المسافات البعيدة أو القريبة بدون نظارات",
+    descFr: "La myopie, l'hypermétropie et l'astigmatisme sont des anomalies de la réfraction oculaire. Selon le bilan, une correction par laser ou par implant peut être envisagée.",
+    descAr: "قصر النظر، طول النظر، والاستجماتيزم هي عيوب انكسارية في العين. وبحسب نتائج الفحص، يمكن النظر في تصحيحها بالليزر أو بعدسة مزروعة.",
+    symptomsFr: [
+      "Flou à distance (panneaux, télévision) ou fatigue en lecture",
+      "Maux de tête fréquents après un effort visuel soutenu",
+      "Dépendance quotidienne aux lunettes ou lentilles de contact",
+    ],
+    symptomsAr: [
+      "عدم وضوح الرؤية في المسافات أو أثناء القراءة",
+      "صداع متكرر بعد مجهود بصري أو استخدام الشاشات",
+      "الاعتماد اليومي المتعب على النظارات أو العدسات اللاصقة",
+    ],
+    examsFr: "Bilan réfractif complet par topographie cornéenne & pachymétrie",
+    examsAr: "فحص انكسار شامل يشمل طوبوغرافيا القرنية وقياس سمكها",
+    badgeFr: "Correction par LASIK, PKR ou SMILE",
+    badgeAr: "تصحيح بالليزك، السطحي PKR أو السمايل",
+  },
+  {
+    id: "dryeye",
+    icon: Droplets,
+    label: t("vision.tab.dryeye"),
+    titleFr: "Picotements, rougeurs & fatigue devant les écrans",
+    titleAr: "حرقان، احمرار وإرهاق سريع أمام الشاشات",
+    descFr: "Le syndrome de l'œil sec provient d'une altération de la qualité ou de la quantité des larmes, accentué par les écrans et la climatisation.",
+    descAr: "متلازمة جفاف العين تنتج عن نقص أو خلل في تركيبة الدموع، وتتفاقم بكثرة مع ساعات العمل أمام الحواسيب والهواتف والمكيفات.",
+    symptomsFr: [
+      "Sensation de sable ou de corps étranger dans les yeux",
+      "Lacrymoiement paradoxal au vent ou à la lumière",
+      "Fluctuation de la vision en fin de journée",
+    ],
+    symptomsAr: [
+      "إحساس بوجود رمل أو جسم غريب داخل العين",
+      "تدميع مفرط ومفاجئ عند التعرض للرياح أو الضوء",
+      "تذبذب في وضوح الرؤية خاصة في المساء",
+    ],
+    examsFr: "Analyse du film lacrymal, test de Schirmer & traitement IPL par lumière pulsée",
+    examsAr: "تحليل جودة الدموع، فحص شيرمر وعلاج الغدد الدمعية بالضوء النبضي IPL",
+    badgeFr: "Traitements ciblés & lumière pulsée",
+    badgeAr: "علاجات موجّهة، منها الضوء النبضي المكثف",
+  },
+  {
+    id: "retina",
+    icon: Activity,
+    label: t("vision.tab.retina"),
+    titleFr: "Lignes déformées, taches ou surveillance du diabète",
+    titleAr: "اعوجاج الخطوط، بقع داكنة أو متابعة السكري",
+    descFr: "La rétine et le nerf optique nécessitent une surveillance attentive, particulièrement en cas de diabète, d'hypertension ou d'antécédents de glaucome.",
+    descAr: "تتطلب شبكية العين والعصب البصري متابعة دورية دقيقة، لا سيما لدى مرضى السكري أو ضغط الدم أو في حالات الشك في ضغط العين (الجلوكوما).",
+    symptomsFr: [
+      "Déformation des lignes droites (métamorphopsies)",
+      "Tache sombre ou zone floue au centre de la vision",
+      "Besoin d'un fond d'œil annuel de contrôle chez le diabétique",
+    ],
+    symptomsAr: [
+      "رؤية الخطوط المستقيمة متموجة أو مكسورة",
+      "بقعة داكنة أو منطقة ضبابية في مركز الرؤية",
+      "الحاجة لفحص قاع العين الدوري السنوي لمريض السكري",
+    ],
+    examsFr: "OCT maculaire & du nerf optique, rétinographie & champ visuel informatisé",
+    examsAr: "تصوير مقطعي بصري OCT للماكولا والعصب البصري، وقاع العين",
+    badgeFr: "OCT, fond d'œil & champ visuel",
+    badgeAr: "OCT وفحص قاع العين والمجال البصري",
+    urgentFr: {
+      title: "Éclairs lumineux, pluie de points noirs ou voile qui s'étend ?",
+      text: "Ce sont des signes d'urgence : n'attendez pas un rendez-vous en ligne. Appelez le cabinet le jour même ; en dehors des horaires, rendez-vous aux urgences les plus proches ou appelez le 190.",
+    },
+    urgentAr: {
+      title: "ومضات ضوئية، أو نقاط سوداء كثيرة، أو ستار يمتدّ أمام العين؟",
+      text: "هذه علامات استعجالية: لا تنتظروا موعداً عبر الإنترنت. اتصلوا بالعيادة في اليوم نفسه، وخارج أوقات العمل توجّهوا إلى أقرب قسم استعجالي أو اتصلوا بالرقم 190.",
+    },
+  },
+  {
+    id: "pediatric",
+    icon: Baby,
+    label: t("vision.tab.pediatric"),
+    titleFr: "Dépistage précoce chez l'enfant & strabisme",
+    titleAr: "الفحص المبكر لبصر الأطفال والحول",
+    descFr: "La vision d'un enfant continue de se développer pendant ses premières années. Un œil paresseux (amblyopie) ou un strabisme se prennent en charge d'autant mieux qu'ils sont repérés tôt.",
+    descAr: "يواصل بصر الطفل نموّه خلال سنواته الأولى، وكلما اكتُشف كسل العين أو الحول مبكراً، كانت معالجته أيسر.",
+    symptomsFr: [
+      "Enfant qui frotte souvent ses yeux ou plisse pour regarder",
+      "Oeil qui dévie occasionnellement vers l'intérieur ou l'extérieur",
+      "Difficultés d'apprentissage ou lenteur inhabituelle à la lecture",
+    ],
+    symptomsAr: [
+      "فرك العين المتكرر أو تضييق الجفون لمحاولة التركيز",
+      "انحراف في إحدى العينين نحو الداخل أو الخارج",
+      "صعوبة في التركيز المدرسي أو بطء غير معتاد في القراءة",
+    ],
+    examsFr: "Réfraction sous cycloplégie, test de vision stéréoscopique & motilité oculaire",
+    examsAr: "قياس دقيق لدرجات النظر بقطرات الاسترخاء، وفحص الرؤية ثلاثية الأبعاد",
+    badgeFr: "Prise en charge pédiatrique bienveillante",
+    badgeAr: "فحص يراعي سنّ الطفل",
+  },
+];
+---
+
+<section id="guide-visuel" class="section-y bg-cream relative overflow-hidden border-t border-line/60">
+  {/* Ambient background glow */}
+  <div class="pointer-events-none absolute -top-40 inset-x-0 mx-auto h-96 w-[45rem] max-w-full rounded-full bg-sand-soft/60 blur-3xl opacity-70"></div>
+
+  <div class="wrap relative">
+    {/* Section Header */}
+    <div class="reveal flex flex-col items-center text-center">
+      <span class="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-1 text-[0.82rem] font-semibold uppercase tracking-wider text-bronze-deep shadow-sm">
+        <Eye size={14} aria-hidden="true" class="text-bronze" />
+        {t("vision.eyebrow")}
+      </span>
+      <h2 class="h2 mt-4 max-w-[28ch]">{t("vision.title")}</h2>
+      <p class="lead mt-4 max-w-[56ch] text-ink-muted">{t("vision.lead")}</p>
+    </div>
+
+    {/* Interactive Tabs Selector */}
+    <div class="reveal mt-12 flex flex-wrap items-center justify-center gap-2.5" data-vision-tabs>
+      {
+        conditions.map((c, i) => {
+          const Icon = c.icon;
+          return (
+            <button
+              type="button"
+              class={`vision-tab-btn inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[0.88rem] font-semibold transition-all duration-300 ${
+                i === 0
+                  ? "bg-ink text-cream shadow-sm scale-100"
+                  : "bg-surface border border-line text-ink hover:border-bronze hover:bg-sand-soft/60"
+              }`}
+              data-target={c.id}
+            >
+              <Icon size={16} aria-hidden="true" class="shrink-0" />
+              <span>{c.label}</span>
+            </button>
+          );
+        })
+      }
+    </div>
+
+    {/* Condition Presentation Panels */}
+    <div class="reveal mt-10" data-vision-panels>
+      {
+        conditions.map((c, i) => (
+          <div
+            id={`panel-${c.id}`}
+            class={`vision-panel ${i === 0 ? "block" : "hidden"} rounded-plate border border-line bg-surface p-7 sm:p-10 shadow-sm`}
+          >
+            <div class="grid gap-8 lg:grid-cols-12 lg:items-center">
+              {/* Left Column: Clinical explanation */}
+              <div class="lg:col-span-7">
+                <div class="inline-flex items-center gap-2 rounded-full bg-sand-soft px-3.5 py-1 text-[0.8rem] font-bold uppercase tracking-wider text-bronze-deep">
+                  <span>{locale === "ar" ? c.badgeAr : c.badgeFr}</span>
+                </div>
+
+                <h3 class="font-display mt-4 text-[1.45rem] font-semibold text-ink sm:text-[1.65rem]">
+                  {locale === "ar" ? c.titleAr : c.titleFr}
+                </h3>
+
+                <p class="mt-3 text-[0.95rem] leading-relaxed text-ink-muted">
+                  {locale === "ar" ? c.descAr : c.descFr}
+                </p>
+
+                {/* Symptoms checklist */}
+                <div class="mt-6 border-t border-line/60 pt-5">
+                  <h4 class="text-[0.82rem] font-bold uppercase tracking-wider text-bronze-deep">
+                    {locale === "ar" ? "أبرز العلامات والأعراض :" : "Signes fréquents & manifestations :"}
+                  </h4>
+                  <ul class="mt-3 flex flex-col gap-2.5 text-[0.9rem] text-ink">
+                    {(locale === "ar" ? c.symptomsAr : c.symptomsFr).map((symptom) => (
+                      <li class="flex items-start gap-2.5">
+                        <span class="mt-[0.5em] h-1.5 w-1.5 shrink-0 rounded-full bg-bronze" aria-hidden="true"></span>
+                        <span class="leading-snug">{symptom}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/*
+                  Flashes, a shower of floaters or a spreading curtain can mean a
+                  retinal tear or detachment. This guide otherwise ends in "book on
+                  Med.tn", which for these symptoms is the wrong advice, so they sit
+                  outside the symptom list and route to the phone instead.
+                */}
+                {c.urgentFr && (
+                  <div class="mt-6 flex items-start gap-3.5 rounded-panel border border-ink/15 bg-cream p-4 sm:p-5" role="note">
+                    <CircleAlert size={20} aria-hidden="true" class="mt-0.5 shrink-0 text-ink" />
+                    <div>
+                      <p class="text-[0.95rem] font-semibold leading-snug text-ink">
+                        {locale === "ar" ? c.urgentAr?.title : c.urgentFr.title}
+                      </p>
+                      <p class="mt-1.5 max-w-[60ch] text-[0.88rem] leading-relaxed text-ink-muted">
+                        {locale === "ar" ? c.urgentAr?.text : c.urgentFr.text}
+                      </p>
+                      <a
+                        href={telHref}
+                        class="mt-3 inline-flex min-h-11 items-center gap-2 text-[0.95rem] font-semibold text-ink underline decoration-ink/30 underline-offset-4 transition-colors hover:decoration-ink"
+                      >
+                        <Phone size={16} aria-hidden="true" />
+                        <bdi dir="ltr">{telDisplay}</bdi>
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column: Diagnostic & Booking recommendation card */}
+              <div class="lg:col-span-5 flex flex-col justify-between rounded-2xl border border-line bg-sand-soft/50 p-6 sm:p-7 backdrop-blur-xs">
+                <div>
+                  <div class="flex items-center gap-2 text-bronze-deep">
+                    <Eye size={18} aria-hidden="true" />
+                    <span class="text-[0.82rem] font-bold uppercase tracking-wider">
+                      {locale === "ar" ? "الفحوصات المعتادة في هذه الحالة" : "Examens généralement pratiqués"}
+                    </span>
+                  </div>
+
+                  <p class="font-display mt-3 text-[1.08rem] font-semibold leading-snug text-ink">
+                    {locale === "ar" ? c.examsAr : c.examsFr}
+                  </p>
+
+                  <p class="mt-3 text-[0.84rem] leading-relaxed text-ink-muted">
+                    {locale === "ar"
+                      ? "هذه الفحوصات من بين الأعمال التي تجريها الدكتورة سعيدان، ويُحدَّد ما يلزمكم منها خلال الاستشارة."
+                      : "Ces examens font partie des actes que pratique le Dr Saidane. Ceux qui vous concernent sont décidés en consultation."}
+                  </p>
+                </div>
+
+                <div class="mt-8 border-t border-line/50 pt-5 flex flex-col gap-2.5">
+                  <a
+                    href={medtnHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn-pill-icon w-full justify-between"
+                  >
+                    <span>{locale === "ar" ? "حجز موعد لهذا الفحص" : "Prendre RDV pour ce motif"}</span>
+                    <span class="btn-icon-circle">
+                      <ArrowUpRight size={15} aria-hidden="true" class="rtl:-scale-x-100 text-ink" />
+                    </span>
+                    <span class="sr-only">({t("a11y.newTab")})</span>
+                  </a>
+
+{/* The per-specialty pages this used to link to (/cataracte, /refractive, ...) were removed. */}
+                  <p class="mt-0.5 text-center text-[0.78rem] text-ink-muted">
+                    {locale === "ar" ? "حجز المواعيد عبر منصة Med.tn" : "Prise de rendez-vous en ligne via Med.tn"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

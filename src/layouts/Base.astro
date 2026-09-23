@@ -1,0 +1,361 @@
+---
+import "../styles/global.css";
+import { ArrowUpRight, ArrowUp, Phone, MessageCircle, Mail, MapPin } from "@lucide/astro";
+import {
+  navLink,
+  homePath,
+  bcp47,
+  dirOf,
+  localizedPath,
+  locales,
+  makeT,
+  navItems,
+  allNavItems,
+  ogLocale,
+  type Locale,
+  type TranslationKey,
+} from "../lib/i18n";
+import {
+  telHref,
+  telDisplay,
+  whatsappHref,
+  whatsappDisplay,
+  mailtoHref,
+  emailDisplay,
+  mapsHref,
+  medtnHref,
+} from "../lib/links";
+import { identity, cabinet } from "../content/practice";
+import TopBar from "../components/site/TopBar.astro";
+import Wordmark from "../components/brand/Wordmark.astro";
+import LocaleSwitch from "../components/site/LocaleSwitch.astro";
+import MobileNavToggle from "../components/site/MobileNavToggle.astro";
+import MobileNavPanel from "../components/site/MobileNavPanel.astro";
+import StickyDock from "../components/site/StickyDock.astro";
+import VisualComfortModal from "../components/site/VisualComfortModal.astro";
+import WhatsAppBubble from "../components/site/WhatsAppBubble.astro";
+import { specialties } from "../content/practice";
+
+interface Props {
+  locale: Locale;
+  jsonLd?: Record<string, unknown>;
+  title?: string;
+  description?: string;
+}
+
+const { locale, jsonLd, title, description } = Astro.props;
+const t = makeT(locale);
+const dir = dirOf(locale);
+const pathname = Astro.url.pathname;
+const isHome = pathname === "/" || pathname === "/ar";
+const homeHref = homePath(locale);
+
+const pageTitle = title ?? t("meta.title");
+const pageDescription = description ?? t("meta.description");
+
+const base = Astro.site ?? new URL("http://localhost:4321");
+const alt = (l: Locale) => new URL(localizedPath(pathname, l), base).toString();
+// Was `new URL(pathname, base)`, i.e. Astro's raw URL for this render - which for
+// /ar comes through as "/ar/" (trailing slash), while `alt("ar")` above (and
+// homePath/localizedPath everywhere else in the app) represent it as "/ar" (no
+// trailing slash). That mismatch meant the Arabic page's own hreflang
+// self-reference disagreed with its canonical tag - exactly the "no return
+// tags" / inconsistent-hreflang warning Search Console flags. Deriving
+// canonical from the same `alt()` the hreflang tags use guarantees they can
+// never disagree again.
+const canonical = alt(locale);
+const ogImage = new URL(`/brand/og-${locale}.png`, base).toString();
+
+const year = new Date().getFullYear();
+const cabinetName = locale === "ar" ? cabinet.nameAr.value : cabinet.nameFr.value;
+const addressLines = locale === "ar" ? cabinet.addressLinesAr.value : cabinet.addressLinesFr.value;
+const docName = locale === "ar" ? identity.nameAr.value : identity.nameFr.value;
+---
+
+<!doctype html>
+<html lang={locale} dir={dir}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <link rel="canonical" href={canonical} />
+
+    {/* Preload critical display and body Arabic font subsets on /ar for instant FCP */}
+    {locale === "ar" && (
+      <>
+        <link rel="preload" href="/fonts/thmanyah/thmanyah-serif-display-regular.woff2" as="font" type="font/woff2" crossorigin />
+        <link rel="preload" href="/fonts/thmanyah/thmanyah-sans-regular.woff2" as="font" type="font/woff2" crossorigin />
+      </>
+    )}
+
+    {/* hreflang for both languages plus x-default */}
+    {locales.map((l) => <link rel="alternate" hreflang={bcp47[l]} href={alt(l)} />)}
+    <link rel="alternate" hreflang="x-default" href={alt("fr")} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={docName} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content={ogLocale[locale]} />
+    {locales.filter((l) => l !== locale).map((l) => <meta property="og:locale:alternate" content={ogLocale[l]} />)}
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={t("meta.ogAlt")} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={pageDescription} />
+
+    <meta name="theme-color" content="#f8f5ef" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="icon" href="/brand/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/brand/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    {jsonLd && <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />}
+
+    <script is:inline>
+      document.documentElement.classList.add("js");
+      // Safety net. `.js .reveal` starts at opacity 0, and only motion.ts
+      // reveals it - motion.ts depends on the `motion` package loading. When
+      // it didn't (a stale dev dependency cache, but the same applies to a
+      // blocked or failed script in production), every section stayed
+      // invisible and the page looked empty. If motion.ts hasn't reported
+      // ready shortly after load, show everything without animation.
+      addEventListener("load", function () {
+        setTimeout(function () {
+          if (document.documentElement.dataset.motion === "ready") return;
+          document.querySelectorAll(".reveal").forEach(function (el) {
+            el.classList.add("is-in");
+          });
+        }, 1500);
+      });
+    </script>
+  </head>
+
+  <body class="bg-cream text-ink-muted antialiased">
+    <div id="scroll-progress"></div>
+    <a href="#main" class="skip-link btn btn-primary no-print">{t("a11y.skip")}</a>
+
+    {/* Top information bar matching drasiri.com */}
+    <TopBar locale={locale} />
+
+    <header
+      class="no-print sticky top-0 z-30 border-b border-transparent bg-cream/90 backdrop-blur-lg transition-colors duration-300 data-[scrolled]:border-line data-[scrolled]:shadow-sm"
+      data-header
+    >
+      <div class="wrap flex h-16 items-center justify-between gap-4 md:h-20">
+        <a href={homeHref} class="shrink-0 rounded-sm" aria-label={docName}>
+          <Wordmark locale={locale} />
+        </a>
+
+        <nav
+          class="hidden items-center gap-6 text-[0.92rem] font-semibold lg:flex xl:gap-8"
+          aria-label={t("a11y.mainNav")}
+        >
+          {
+            navItems.map((item) => (
+              <a
+                href={navLink(locale, item.id, isHome)}
+                class="py-2 whitespace-nowrap text-ink-muted transition-colors hover:text-ink relative after:absolute after:bottom-0 after:inset-x-0 after:h-0.5 after:bg-bronze after:scale-x-0 hover:after:scale-x-100 after:transition-transform"
+              >
+                {t(item.key)}
+              </a>
+            ))
+          }
+        </nav>
+
+        <div class="flex items-center gap-3 lg:gap-4">
+          <LocaleSwitch locale={locale} pathname={pathname} class="hidden sm:flex" />
+          <a
+            href={medtnHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-pill-icon hidden lg:inline-flex"
+          >
+            <span>{t("cta.book")}</span>
+            <span class="btn-icon-circle">
+              <ArrowUpRight size={15} aria-hidden="true" class="rtl:-scale-x-100 text-ink" />
+            </span>
+            <span class="sr-only">({t("a11y.newTab")})</span>
+          </a>
+          <MobileNavToggle locale={locale} />
+        </div>
+      </div>
+    </header>
+
+    <MobileNavPanel locale={locale} pathname={pathname} />
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer class="band-dark border-t border-sand-ink/15">
+      <div class="wrap py-16 md:py-20">
+        <div class="grid gap-12 sm:grid-cols-2 lg:grid-cols-12 lg:gap-8">
+          {/* Column 1: Clinic & Doctor Presentation */}
+          <div class="lg:col-span-4">
+            <Wordmark locale={locale} tone="light" size="lg" />
+            <p class="mt-5 max-w-[34ch] text-[0.92rem] leading-relaxed text-sand-ink">
+              {locale === "ar" ? identity.titleAr.value : identity.titleFr.value}
+            </p>
+            <div class="mt-6 flex flex-wrap items-center gap-2 text-[0.82rem] font-medium text-bronze-light">
+              <span class="inline-flex items-center gap-1.5 rounded-full border border-sand-ink/20 bg-ink-soft px-3 py-1">
+                ✓ {locale === "ar" ? "عيادة متعاقدة مع الكنام" : "Conventionné CNAM"}
+              </span>
+              <span class="inline-flex items-center gap-1.5 rounded-full border border-sand-ink/20 bg-ink-soft px-3 py-1">
+                ✓ {cabinetName}
+              </span>
+            </div>
+          </div>
+
+          {/* Column 2: Navigation Links */}
+          <nav class="lg:col-span-2" aria-label={t("a11y.footerNav")}>
+            <h2 class="field-label text-bronze-light">{t("footer.navTitle")}</h2>
+            <ul class="mt-4 flex flex-col gap-1 text-[0.92rem]">
+              <li>
+                <a href={homeHref} class="inline-block py-1.5 text-sand-ink transition-colors hover:text-cream">
+                  {t("nav.home")}
+                </a>
+              </li>
+              {
+                allNavItems.map((item) => (
+                  <li>
+                    <a
+                      href={navLink(locale, item.id, isHome)}
+                      class="inline-block py-1.5 text-sand-ink transition-colors hover:text-cream"
+                    >
+                      {t(item.key)}
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </nav>
+
+          {/* Column 3: Medical Services & Explorations. These used to link to
+              a dedicated page per specialty (/cataracte, /ar/cataracte, ...);
+              those pages were removed, so they now jump to that specialty's
+              card in the Specialties section on the homepage instead - each
+              card already carries id={spec.id} as a scroll anchor. */}
+          <div class="lg:col-span-3">
+            <h2 class="field-label text-bronze-light">{t("footer.servicesTitle")}</h2>
+            <ul class="mt-4 flex flex-col gap-1 text-[0.92rem]">
+              {
+                specialties.map((spec) => (
+                  <li>
+                    <a
+                      href={`${homePath(locale)}#${spec.id}`}
+                      class="inline-block py-1.5 text-sand-ink transition-colors hover:text-cream"
+                    >
+                      {t(`spec.${spec.id}.name` as TranslationKey)}
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+
+          {/* Column 4: Contact & Hours */}
+          <div class="lg:col-span-3">
+            <h2 class="field-label text-bronze-light">{t("footer.contactTitle")}</h2>
+            <ul class="mt-4 flex flex-col gap-1.5 text-[0.92rem]">
+              <li>
+                <a href={telHref} class="inline-flex items-center gap-2.5 py-1 text-sand-ink transition-colors hover:text-cream">
+                  <Phone size={15} aria-hidden="true" class="shrink-0 text-bronze-light" />
+                  <bdi dir="ltr">{telDisplay}</bdi>
+                </a>
+              </li>
+              <li>
+                <a
+                  href={whatsappHref(t("wa.message"))}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-2.5 py-1 text-sand-ink transition-colors hover:text-cream"
+                >
+                  <MessageCircle size={15} aria-hidden="true" class="shrink-0 text-bronze-light" />
+                  <bdi dir="ltr">{whatsappDisplay}</bdi>
+                </a>
+              </li>
+              <li>
+                <a href={mailtoHref} class="inline-flex items-center gap-2.5 break-all py-1 text-sand-ink transition-colors hover:text-cream">
+                  <Mail size={15} aria-hidden="true" class="shrink-0 text-bronze-light" />
+                  <bdi dir="ltr">{emailDisplay}</bdi>
+                </a>
+              </li>
+              <li>
+                <a
+                  href={mapsHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-start gap-2.5 py-1 text-sand-ink transition-colors hover:text-cream"
+                >
+                  <MapPin size={15} aria-hidden="true" class="mt-1 shrink-0 text-bronze-light" />
+                  <span>
+                    {cabinetName}<br />{addressLines[3]}
+                  </span>
+                </a>
+              </li>
+            </ul>
+
+            <div class="mt-6">
+              <a
+                href={medtnHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-pill-icon-light"
+              >
+                <span>{t("cta.book")}</span>
+                <span class="btn-icon-circle">
+                  <ArrowUpRight size={14} aria-hidden="true" class="rtl:-scale-x-100 text-cream" />
+                </span>
+                <span class="sr-only">({t("a11y.newTab")})</span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-14 flex flex-col gap-6 border-t border-sand-ink/20 pt-8">
+          <p class="max-w-[72ch] text-[0.82rem] leading-relaxed text-sand-ink/80">{t("footer.disclaimer")}</p>
+          <div class="flex flex-col-reverse items-start justify-between gap-5 sm:flex-row sm:items-center">
+            <p class="text-[0.82rem] text-sand-ink/80">
+              &copy; <bdi dir="ltr">{year}</bdi> {docName}. {t("footer.rights")}
+            </p>
+            <LocaleSwitch locale={locale} pathname={pathname} tone="light" />
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    {/* Floating Toast notification for copy & actions */}
+    <div
+      id="toast"
+      class="pointer-events-none fixed inset-x-0 bottom-24 lg:bottom-10 mx-auto w-fit z-50 flex items-center gap-2.5 rounded-full bg-ink px-4 py-2.5 text-[0.84rem] font-medium text-cream shadow-2xl border border-sand-ink/20 opacity-0 translate-y-4 transition-all duration-300"
+      role="status"
+      aria-live="polite"
+    >
+      <span class="h-2 w-2 rounded-full bg-bronze"></span>
+      <span id="toast-text">{t("toast.copied")}</span>
+    </div>
+
+    {/* Scroll-to-top floating button - positioned above WhatsApp bubble */}
+    <button
+      id="scroll-to-top"
+      type="button"
+      class="group pointer-events-none fixed bottom-24 lg:bottom-28 end-4 sm:end-8 z-40 grid h-11 w-11 place-items-center rounded-full border border-line bg-surface/95 text-ink shadow-lg backdrop-blur-md opacity-0 translate-y-3 transition-all duration-300 hover:bg-sand-soft hover:-translate-y-1 hover:shadow-xl hover:scale-105 active:scale-95 no-print"
+      aria-label={locale === "ar" ? "العودة إلى أعلى الصفحة" : "Retour en haut"}
+    >
+      <ArrowUp size={18} aria-hidden="true" class="transition-transform duration-200 group-hover:-translate-y-0.5" />
+    </button>
+
+    <VisualComfortModal locale={locale} />
+    <WhatsAppBubble locale={locale} />
+
+    <StickyDock locale={locale} />
+
+    <script src="../scripts/motion.ts"></script>
+  </body>
+</html>

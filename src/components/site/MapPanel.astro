@@ -1,0 +1,81 @@
+---
+import { MapPin } from "@lucide/astro";
+import { mapEmbedSrc } from "../../lib/links";
+import { cabinet } from "../../content/practice";
+import { makeT, type Locale } from "../../lib/i18n";
+
+/**
+ * The map, loaded only when the visitor asks for it.
+ *
+ * An always-on Google Maps iframe would contact Google and set cookies before a
+ * patient has done anything at all, on a page about their eyesight. It is also
+ * roughly half a megabyte and the single worst thing on the page for LCP. So the
+ * panel renders as a real composition first, and the iframe replaces it on click.
+ *
+ * `output=embed` needs no API key and no billing account.
+ */
+interface Props {
+  locale: Locale;
+  class?: string;
+}
+
+const { locale, class: className = "" } = Astro.props;
+const t = makeT(locale);
+
+const name = locale === "ar" ? cabinet.nameAr.value : cabinet.nameFr.value;
+const landmark = locale === "ar" ? cabinet.landmarkAr.value : cabinet.landmarkFr.value;
+---
+
+<div
+  class={`relative overflow-hidden rounded-plate border border-line bg-sand-soft min-h-[320px] lg:h-full lg:min-h-[400px] ${className}`}
+  data-map-panel
+  data-src={mapEmbedSrc}
+  data-title={t("cabinet.mapTitle")}
+>
+  <!-- A quiet street-grid suggestion: decorative, and gone the moment the real map loads. -->
+  <svg
+    class="pointer-events-none absolute inset-0 h-full w-full opacity-[0.5]"
+    viewBox="0 0 400 300"
+    fill="none"
+    aria-hidden="true"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g stroke="var(--color-line)" stroke-width="1.5">
+      <path d="M-20 92 H420" /><path d="M-20 206 H420" />
+      <path d="M104 -20 V320" /><path d="M286 -20 V320" />
+    </g>
+    <path d="M-20 148 L180 148 L232 206 L420 206" stroke="var(--color-sand)" stroke-width="7" />
+  </svg>
+
+  <div class="relative flex h-full flex-col items-center justify-center gap-4 px-6 text-center">
+    <span class="grid h-12 w-12 place-items-center rounded-full bg-cream text-bronze-deep shadow-sm">
+      <MapPin size={22} aria-hidden="true" />
+    </span>
+    <p class="max-w-[28ch]">
+      <span class="block font-semibold text-ink">{name}</span>
+      <span class="mt-1 block text-[0.92rem] text-ink-muted">{landmark}</span>
+    </p>
+    <button type="button" class="btn btn-ghost bg-cream" data-map-load>
+      {t("cabinet.mapLoad")}
+    </button>
+    <p class="max-w-[30ch] text-[0.78rem] leading-relaxed text-ink-muted/85">{t("cabinet.mapNote")}</p>
+  </div>
+</div>
+
+<script>
+  // Swap the placeholder for the real embed on click. Nothing is requested from
+  // Google until this runs.
+  document.querySelectorAll<HTMLElement>("[data-map-panel]").forEach((panel) => {
+    const button = panel.querySelector<HTMLButtonElement>("[data-map-load]");
+    button?.addEventListener("click", () => {
+      const iframe = document.createElement("iframe");
+      iframe.src = panel.dataset.src ?? "";
+      iframe.title = panel.dataset.title ?? "";
+      iframe.loading = "lazy";
+      iframe.referrerPolicy = "no-referrer-when-downgrade";
+      iframe.className = "absolute inset-0 h-full w-full border-0";
+      iframe.setAttribute("allowfullscreen", "");
+      panel.replaceChildren(iframe);
+    });
+  });
+</script>

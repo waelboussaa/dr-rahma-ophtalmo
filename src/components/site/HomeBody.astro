@@ -1,0 +1,53 @@
+---
+import Hero from "../sections/Hero.astro";
+import QuickInfoStrip from "../sections/QuickInfoStrip.astro";
+import Trust from "../sections/Trust.astro";
+import About from "../sections/About.astro";
+import StatsBanner from "../sections/StatsBanner.astro";
+import Journey from "../sections/Journey.astro";
+import Specialties from "../sections/Specialties.astro";
+import VisionGuide from "../sections/VisionGuide.astro";
+import Technologies from "../sections/Technologies.astro";
+import ConsultationPrep from "../sections/ConsultationPrep.astro";
+import FAQ from "../sections/FAQ.astro";
+import Booking from "../sections/Booking.astro";
+import Cabinet from "../sections/Cabinet.astro";
+import Contact from "../sections/Contact.astro";
+import type { Locale } from "../../lib/i18n";
+
+/**
+ * The homepage, structured to mirror drasiri.com's modern UI architecture:
+ * 1. Hero (Doctor headline, credentials, trust indicators, floating badges)
+ * 2. QuickInfoStrip (4 elevated info & contact cards)
+ * 3. Trust (4 Featured Medical Services)
+ * 4. About (Doctor biography, credentials grid)
+ * 5. StatsBanner (four verified facts about the cabinet - no invented metrics)
+ * 6. Journey (5 treatment steps: 01 to 05)
+ * 7. Specialties (6 detailed treatment plans with direct booking)
+ * 8. Technologies (Diagnostic explorations & medical technologies)
+ * 9. FAQ (Collapsible accordion of common patient questions)
+ * 10. Booking (High-conversion consultation card)
+ * 11. Cabinet (Access, landmark & interactive map)
+ * 12. Contact (Direct contact methods & emergency notice)
+ */
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+---
+
+<Hero locale={locale} />
+<QuickInfoStrip locale={locale} />
+<Trust locale={locale} />
+<About locale={locale} />
+<StatsBanner locale={locale} />
+<Journey locale={locale} />
+<Specialties locale={locale} />
+<VisionGuide locale={locale} />
+<Technologies locale={locale} />
+<ConsultationPrep locale={locale} />
+<FAQ locale={locale} />
+<Booking locale={locale} />
+<Cabinet locale={locale} />
+<Contact locale={locale} />

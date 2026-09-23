@@ -1,0 +1,36 @@
+---
+/**
+ * The shared opening of a section: heading, optional lead.
+ *
+ * There is deliberately no eyebrow slot. A small uppercase label floated above
+ * a heading spends the reader's first line of attention on a word that repeats
+ * what the heading already says - "SPÉCIALITÉS" over "Une expertise complète
+ * pour votre vision." tells nobody anything. The heading carries its own weight.
+ *
+ * Small uppercase labels that name DATA rather than decorate a heading
+ * ("Adresse", "Horaires", "Téléphone") are a different thing, and use the
+ * `.field-label` class directly.
+ *
+ * Sections differ a lot below this point by design, so this does not wrap the
+ * whole section. It only guarantees the heading rhythm and level are consistent.
+ */
+interface Props {
+  title: string;
+  lead?: string;
+  /** dark bands invert the lead colour */
+  tone?: "dark" | "light";
+  align?: "start" | "center";
+  class?: string;
+  id?: string;
+}
+
+const { title, lead, tone = "dark", align = "start", class: className = "", id } = Astro.props;
+
+const leadColor = tone === "light" ? "text-sand-ink" : "text-ink-muted";
+const alignment = align === "center" ? "items-center text-center" : "items-start text-start";
+---
+
+<div class={`flex flex-col ${alignment} ${className}`}>
+  <h2 class="h2 max-w-[22ch]" id={id}>{title}</h2>
+  {lead && <p class={`lead mt-6 max-w-[54ch] ${leadColor}`}>{lead}</p>}
+</div>

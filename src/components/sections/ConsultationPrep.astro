@@ -1,0 +1,89 @@
+---
+import { FileText, Glasses, Eye, MapPin, Sparkles, ArrowUpRight } from "@lucide/astro";
+import { makeT, type Locale } from "../../lib/i18n";
+import { mapsHref } from "../../lib/links";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = makeT(locale);
+
+const checklistItems = [
+  {
+    icon: FileText,
+    title: t("prep.item1.title"),
+    text: t("prep.item1.text"),
+  },
+  {
+    icon: Glasses,
+    title: t("prep.item2.title"),
+    text: t("prep.item2.text"),
+  },
+  {
+    icon: Eye,
+    title: t("prep.item3.title"),
+    text: t("prep.item3.text"),
+  },
+  {
+    icon: MapPin,
+    title: t("prep.item4.title"),
+    text: t("prep.item4.text"),
+    link: mapsHref,
+    linkText: locale === "ar" ? "عرض المسار على Google Maps" : "Itinéraire sur Google Maps",
+  },
+];
+---
+
+<section id="preparer-consultation" class="section-y bg-sand-soft/40 relative overflow-hidden border-t border-line/60">
+  <div class="wrap relative">
+    {/* Section Header */}
+    <div class="reveal flex flex-col items-center text-center">
+      <span class="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-1 text-[0.82rem] font-semibold uppercase tracking-wider text-bronze-deep shadow-2xs">
+        <Sparkles size={14} aria-hidden="true" class="text-bronze" />
+        {t("prep.eyebrow")}
+      </span>
+      <h2 class="h2 mt-4 max-w-[28ch]">{t("prep.title")}</h2>
+      <p class="lead mt-4 max-w-[56ch] text-ink-muted">{t("prep.lead")}</p>
+    </div>
+
+    {/* 4 Cards Grid */}
+    <div class="reveal mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {
+        checklistItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <div class="flex flex-col justify-between rounded-plate border border-line bg-surface p-7 shadow-2xs transition-transform duration-300 hover:-translate-y-1">
+              <div>
+                <div class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-sand-soft text-bronze-deep">
+                  <Icon size={22} aria-hidden="true" />
+                </div>
+                <h3 class="font-display mt-5 text-[1.12rem] font-semibold leading-snug text-ink">
+                  {item.title}
+                </h3>
+                <p class="mt-3 text-[0.88rem] leading-relaxed text-ink-muted">
+                  {item.text}
+                </p>
+              </div>
+
+              {item.link && (
+                <div class="mt-6 border-t border-line/50 pt-4">
+                  <a
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1.5 text-[0.84rem] font-semibold text-bronze-deep transition-colors hover:text-ink"
+                  >
+                    <span>{item.linkText}</span>
+                    <ArrowUpRight size={14} aria-hidden="true" class="rtl:-scale-x-100" />
+                  </a>
+                </div>
+              )}
+            </div>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>

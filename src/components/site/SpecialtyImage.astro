@@ -1,0 +1,84 @@
+---
+import fs from "node:fs";
+
+/**
+ * The blob-masked image that sits in the top-inline-end corner of a specialty
+ * card, matching the reference layout the owner supplied.
+ *
+ * Built the same way as Portrait.astro: the card is finished WITHOUT a photo,
+ * and a photo is an upgrade rather than a dependency. Drop
+ * `public/specialties/<id>.avif` (and optionally `.webp` / `.jpg`) in and it
+ * appears with no layout change. Until then the mask is filled with a sand
+ * ground carrying the practice mark's arc, so an empty card reads as a designed
+ * shape rather than a hole.
+ *
+ * The mask is a leaf: heavy curvature on two opposite corners, slight on the
+ * others. It is deliberately ASYMMETRIC, which means RTL needs handling - the
+ * container mirrors so the shape points the right way, and the image inside
+ * counter-mirrors so the photograph itself is never flipped. Flipping a
+ * photograph of a person or an instrument is the kind of error nobody notices
+ * until a patient does.
+ *
+ * Art direction and the six generation prompts live in docs/01-design-system.md.
+ */
+interface Props {
+  /** specialty id, used to find the file */
+  id: string;
+  /** localized, descriptive; never "image of a specialty" */
+  alt: string;
+  class?: string;
+}
+
+const { id, alt, class: className = "" } = Astro.props;
+
+// Build-time only: output is static, so this runs on Node during `astro build`.
+const dir = new URL("../../../public/specialties/", import.meta.url);
+const candidates = [
+  { file: `${id}.avif`, type: "image/avif" },
+  { file: `${id}.webp`, type: "image/webp" },
+  { file: `${id}.jpg`, type: "image/jpeg" },
+];
+const present = candidates.filter((c) => fs.existsSync(new URL(c.file, dir)));
+const fallback = present.find((c) => c.type === "image/jpeg") ?? present.at(-1);
+const sources = present.filter((c) => c !== fallback);
+---
+
+<div
+  class={`relative overflow-hidden rtl:-scale-x-100 ${className}`}
+  style="aspect-ratio: 4/5; clip-path: url(#specialty-leaf);"
+>
+  {
+    fallback ? (
+      <picture>
+        {sources.map((s) => (
+          <source srcset={`/specialties/${s.file}`} type={s.type} />
+        ))}
+        <img
+          src={`/specialties/${fallback.file}`}
+          alt={alt}
+          width="560"
+          height="700"
+          loading="lazy"
+          decoding="async"
+          class="h-full w-full object-cover rtl:-scale-x-100"
+        />
+      </picture>
+    ) : (
+      <div class="absolute inset-0 bg-sand" aria-hidden="true">
+        <svg
+          viewBox="0 0 64 64"
+          fill="none"
+          class="absolute -inset-[30%] h-[160%] w-[160%] opacity-45"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M54.55 40.21 A 24 24 0 1 1 54.55 23.79"
+            stroke="var(--color-bronze)"
+            stroke-width="1.1"
+            stroke-linecap="round"
+          />
+        </svg>
+      </div>
+    )
+  }
+</div>

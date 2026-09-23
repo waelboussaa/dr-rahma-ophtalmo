@@ -1,0 +1,137 @@
+---
+import { X, Phone, MessageCircle, ArrowUpRight, Eye } from "@lucide/astro";
+import { navLink, allNavItems, makeT, type Locale } from "../../lib/i18n";
+import { telHref, whatsappHref, medtnHref, telDisplay } from "../../lib/links";
+import LocaleSwitch from "./LocaleSwitch.astro";
+import EyeMark from "../brand/EyeMark.astro";
+
+interface Props {
+  locale: Locale;
+  pathname: string;
+}
+
+const { locale, pathname } = Astro.props;
+const t = makeT(locale);
+const isHome = pathname === "/" || pathname === "/ar";
+---
+
+<div
+  id="mobile-nav"
+  class="fixed inset-0 z-50 hidden bg-cream lg:hidden"
+  data-nav-panel
+  hidden
+>
+  <div class="flex h-full flex-col overflow-y-auto">
+    <div class="flex h-16 shrink-0 items-center justify-between border-b border-line px-5">
+      {/* The mark alone: with the language switch and close button beside it,
+          the full name had 180px and wrapped to three lines. The name is in the
+          page header directly behind this menu. */}
+      <EyeMark size={38} tone="duo" class="shrink-0" />
+      <div class="flex shrink-0 items-center gap-2">
+        <LocaleSwitch locale={locale} pathname={pathname} />
+        <button
+          type="button"
+          class="btn btn-ghost h-11 w-11 min-h-11 !px-0"
+          aria-label={t("a11y.closeMenu")}
+          data-nav-close
+        >
+          <X size={20} aria-hidden="true" />
+        </button>
+      </div>
+    </div>
+
+    <nav class="flex flex-col px-5 py-4" aria-label={t("a11y.mainNav")}>
+      {
+        allNavItems.map((item) => (
+          <a
+            href={navLink(locale, item.id, isHome)}
+            class="border-b border-line/70 py-5 font-display text-[1.45rem] text-ink transition-colors hover:text-bronze-deep"
+            data-nav-link
+          >
+            {t(item.key)}
+          </a>
+        ))
+      }
+      {/* The comfort settings, as a row of the menu rather than a pill in its
+          header: wordmark, pill, language switch and close button did not fit
+          in 375px - the name wrapped to three lines and the pill sat on top of
+          the language switch. */}
+      <button
+        type="button"
+        class="flex min-h-14 items-center gap-2.5 py-4 text-start text-[1rem] font-semibold text-ink-soft transition-colors hover:text-bronze-deep"
+        data-a11y-trigger
+        aria-haspopup="dialog"
+      >
+        <Eye size={18} aria-hidden="true" class="text-bronze-deep" />
+        {t("a11y.menuTitle")}
+      </button>
+    </nav>
+
+    <div class="mt-auto flex flex-col gap-3 border-t border-line px-5 py-6">
+      <a href={medtnHref} target="_blank" rel="noopener noreferrer" class="btn btn-primary min-h-14">
+        {t("cta.bookMedtn")}
+        <ArrowUpRight size={17} aria-hidden="true" class="rtl:-scale-x-100" />
+        <span class="sr-only">({t("a11y.newTab")})</span>
+      </a>
+      <div class="flex gap-3">
+        <a href={telHref} class="btn btn-ghost min-h-13 flex-1 bg-surface">
+          <Phone size={17} aria-hidden="true" />
+          {t("cta.call")}
+        </a>
+        <a
+          href={whatsappHref(t("wa.message"))}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn btn-ghost min-h-13 flex-1 bg-surface"
+        >
+          <MessageCircle size={17} aria-hidden="true" />
+          {t("cta.whatsapp")}
+        </a>
+      </div>
+      <p class="pt-1 text-center text-[0.85rem] text-ink-muted">
+        <bdi dir="ltr">{telDisplay}</bdi>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>("[data-nav-toggle]");
+  const panel = document.querySelector<HTMLElement>("[data-nav-panel]");
+  const closeBtn = document.querySelector<HTMLButtonElement>("[data-nav-close]");
+  const iconOpen = toggle?.querySelector<SVGElement>("[data-icon-open]");
+  const iconClose = toggle?.querySelector<SVGElement>("[data-icon-close]");
+
+  if (toggle && panel) {
+    const setOpen = (open: boolean) => {
+      panel.hidden = !open;
+      panel.classList.toggle("hidden", !open);
+      toggle.setAttribute("aria-expanded", String(open));
+      iconOpen?.classList.toggle("hidden", open);
+      iconClose?.classList.toggle("hidden", !open);
+      // Stop the page behind the overlay from scrolling under a thumb.
+      document.documentElement.style.overflow = open ? "hidden" : "";
+      if (open) closeBtn?.focus();
+      else toggle.focus();
+    };
+
+    // aria-expanded is the source of truth: `panel.hidden` is typed
+    // `boolean | "until-found"`, so reading it back is not a clean boolean.
+    toggle.addEventListener("click", () => setOpen(toggle.getAttribute("aria-expanded") !== "true"));
+    closeBtn?.addEventListener("click", () => setOpen(false));
+
+    // Anchor links close the menu; without this the panel stays over the target.
+    panel.querySelectorAll("[data-nav-link]").forEach((link) =>
+      link.addEventListener("click", () => setOpen(false)),
+    );
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !panel.hidden) setOpen(false);
+    });
+
+    // A resize into the desktop layout must not leave the overlay latched open.
+    matchMedia("(min-width: 1024px)").addEventListener("change", (e) => {
+      if (e.matches && !panel.hidden) setOpen(false);
+    });
+  }
+</script>

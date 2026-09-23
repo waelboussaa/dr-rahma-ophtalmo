@@ -1,0 +1,123 @@
+---
+import { Phone, MessageCircle, Mail, MapPin, CircleAlert } from "@lucide/astro";
+import { sections, makeT, type Locale } from "../../lib/i18n";
+import {
+  telHref,
+  telDisplay,
+  whatsappHref,
+  whatsappDisplay,
+  mailtoHref,
+  emailDisplay,
+  mapsHref,
+} from "../../lib/links";
+import { cabinet } from "../../content/practice";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = makeT(locale);
+
+const name = locale === "ar" ? cabinet.nameAr.value : cabinet.nameFr.value;
+const lines = locale === "ar" ? cabinet.addressLinesAr.value : cabinet.addressLinesFr.value;
+
+const contactCards = [
+  {
+    icon: Phone,
+    label: t("contact.phoneLabel"),
+    value: telDisplay,
+    href: telHref,
+    external: false,
+    action: t("cta.call"),
+    isLtr: true,
+  },
+  {
+    icon: MessageCircle,
+    label: t("contact.whatsappLabel"),
+    value: whatsappDisplay,
+    href: whatsappHref(t("wa.message")),
+    external: true,
+    action: t("cta.whatsapp"),
+    isLtr: true,
+  },
+  {
+    icon: Mail,
+    label: t("contact.emailLabel"),
+    value: emailDisplay,
+    href: mailtoHref,
+    external: false,
+    action: locale === "ar" ? "مراسلة" : "Envoyer un e-mail",
+    isLtr: true,
+  },
+  {
+    icon: MapPin,
+    label: t("contact.addressLabel"),
+    value: `${name} — ${lines[3]}`,
+    href: mapsHref,
+    external: true,
+    action: t("cta.directions"),
+    isLtr: false,
+  },
+];
+---
+
+<section id={sections.contact} class="section-y bg-cream">
+  <div class="wrap">
+    <div class="reveal flex flex-col items-center text-center">
+      <span class="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-1 text-[0.82rem] font-semibold uppercase tracking-wider text-bronze-deep shadow-sm">
+        {t("contact.eyebrow")}
+      </span>
+      <h2 class="h2 mt-4 max-w-[22ch]">{t("contact.title")}</h2>
+      <p class="lead mt-4 max-w-[54ch] text-ink-muted">{t("contact.lead")}</p>
+    </div>
+
+    {/* 4 Contact Cards Grid */}
+    <div class="reveal mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {
+        contactCards.map((item) => (
+          <div class="group flex flex-col justify-between rounded-plate border border-line bg-surface p-7 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-bronze hover:shadow-md text-start">
+            <div>
+              <div class="grid h-12 w-12 place-items-center rounded-2xl bg-sand/60 text-bronze-deep transition-colors group-hover:bg-ink group-hover:text-cream">
+                <item.icon size={22} aria-hidden="true" stroke-width={1.6} />
+              </div>
+
+              <h3 class="field-label mt-6 text-bronze-deep">
+                {item.label}
+              </h3>
+
+              <a
+                href={item.href}
+                target={item.external ? "_blank" : undefined}
+                rel={item.external ? "noopener noreferrer" : undefined}
+                class="mt-3 block font-display text-[1.08rem] font-semibold break-words text-ink transition-colors group-hover:text-bronze-deep"
+              >
+                {item.isLtr ? <bdi dir="ltr">{item.value}</bdi> : <span>{item.value}</span>}
+              </a>
+            </div>
+
+            <div class="mt-6 border-t border-line/50 pt-4">
+              <a
+                href={item.href}
+                target={item.external ? "_blank" : undefined}
+                rel={item.external ? "noopener noreferrer" : undefined}
+                class="inline-flex items-center gap-1.5 text-[0.84rem] font-semibold text-bronze-deep transition-colors group-hover:text-ink"
+              >
+                <span>{item.action}</span>
+                <span class="text-sm rtl:-scale-x-100">→</span>
+              </a>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    {/* Emergency Notice */}
+    <div class="reveal mt-12 mx-auto max-w-3xl flex items-start gap-3.5 rounded-plate border border-line bg-sand-soft/50 p-5 backdrop-blur-xs">
+      <CircleAlert size={20} aria-hidden="true" class="shrink-0 text-bronze-deep mt-0.5" />
+      <p class="max-w-[68ch] text-[0.88rem] leading-relaxed text-ink-muted">
+        {t("contact.emergency")}
+      </p>
+    </div>
+  </div>
+</section>

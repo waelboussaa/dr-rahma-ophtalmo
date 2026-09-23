@@ -1,0 +1,72 @@
+---
+import { Scan, Eye, Activity, Target, Radio, Layers, Check } from "@lucide/astro";
+import { sections, makeT, type Locale, type TranslationKey } from "../../lib/i18n";
+import { examinations } from "../../content/practice";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = makeT(locale);
+
+const examIcons = {
+  oct: Scan,
+  topographie: Layers,
+  "champ-visuel": Target,
+  tension: Activity,
+  echographie: Radio,
+  "fond-oeil": Eye,
+};
+---
+
+<section id={sections.tech} class="section-y bg-cream">
+  <div class="wrap">
+    <div class="reveal flex flex-col items-center text-center">
+      <span class="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-1 text-[0.82rem] font-semibold uppercase tracking-wider text-bronze-deep shadow-sm">
+        {t("tech.eyebrow")}
+      </span>
+      <h2 class="h2 mt-4 max-w-[24ch]">{t("tech.title")}</h2>
+      <p class="lead mt-4 max-w-[54ch] text-ink-muted">{t("tech.lead")}</p>
+    </div>
+
+    {/* 6 Explorations Grid */}
+    <div class="reveal mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        examinations.map((exam) => {
+          const Icon = examIcons[exam.id as keyof typeof examIcons] ?? Eye;
+          return (
+            <div class="group flex flex-col justify-between rounded-plate border border-line bg-surface p-7 shadow-xs transition-all duration-300 hover:-translate-y-1 hover:border-bronze hover:shadow-md">
+              <div class="text-start">
+                <div class="grid h-12 w-12 place-items-center rounded-2xl bg-sand/60 text-bronze-deep transition-colors group-hover:bg-ink group-hover:text-cream">
+                  <Icon size={24} aria-hidden="true" stroke-width={1.6} />
+                </div>
+
+                <h3 class="font-display mt-6 text-[1.18rem] leading-snug text-ink font-semibold transition-colors group-hover:text-bronze-deep">
+                  {t(`exam.${exam.id}.name` as TranslationKey)}
+                </h3>
+
+                <p class="mt-3 text-[0.91rem] leading-relaxed text-ink-muted">
+                  {t(`exam.${exam.id}.text` as TranslationKey)}
+                </p>
+              </div>
+
+              <div class="mt-6 border-t border-line/40 pt-3 text-start">
+                <span class="inline-flex items-center gap-1.5 text-[0.78rem] font-semibold text-bronze-deep">
+                  <Check size={14} aria-hidden="true" class="shrink-0 text-bronze" />
+                  <span>{locale === "ar" ? "من الفحوصات التي تجريها الطبيبة" : "Examen pratiqué par le Dr Saidane"}</span>
+                </span>
+              </div>
+            </div>
+          );
+        })
+      }
+    </div>
+
+    <div class="reveal mt-10 text-center">
+      <p class="mx-auto max-w-[46ch] text-[0.86rem] leading-relaxed text-ink-muted">
+        {t("tech.note")}
+      </p>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,103 @@
+---
+import fs from "node:fs";
+import EyeMark from "../brand/EyeMark.astro";
+import { makeT, type Locale } from "../../lib/i18n";
+
+/**
+ * The portrait slot.
+ *
+ * No photograph of Dr Saidane exists yet, so this component is built the other
+ * way round from the usual: the page is finished WITHOUT a photo, and a photo is
+ * an upgrade rather than a dependency. With no file present it renders a brand
+ * plate - the mark over an oversized cropped arc - which reads as a deliberate
+ * composition instead of a grey box waiting to be filled.
+ *
+ * To add the real portrait, drop a file into public/brand/ named portrait.avif,
+ * portrait.webp or portrait.jpg. Nothing else changes: same slot, same aspect,
+ * no layout shift. Art direction for shooting or generating it is in
+ * docs/01-design-system.md.
+ */
+interface Props {
+  locale: Locale;
+  /** hero runs 3:4, the about split runs a squarer 4:5 */
+  ratio?: "3/4" | "4/5";
+  class?: string;
+  /** the hero image is the LCP element and must not be lazy */
+  eager?: boolean;
+}
+
+const { locale, ratio = "3/4", class: className = "", eager = false } = Astro.props;
+const t = makeT(locale);
+
+// Build-time only: output is static, so this runs on Node during `astro build`.
+const publicDir = new URL("../../../public/brand/", import.meta.url);
+const candidates = [
+  { file: "portrait.avif", type: "image/avif" },
+  { file: "portrait.webp", type: "image/webp" },
+  { file: "portrait.jpg", type: "image/jpeg" },
+];
+const present = candidates.filter((c) => fs.existsSync(new URL(c.file, publicDir)));
+const fallback = present.find((c) => c.type === "image/jpeg") ?? present.at(-1);
+const sources = present.filter((c) => c !== fallback);
+---
+
+<div
+  class={`relative overflow-hidden rounded-photo border border-line bg-sand-soft ${className}`}
+  style={`aspect-ratio: ${ratio};`}
+>
+  {
+    fallback ? (
+      <picture>
+        {sources.map((s) => (
+          <source srcset={`/brand/${s.file}`} type={s.type} />
+        ))}
+        <img
+          src={`/brand/${fallback.file}`}
+          alt={t("a11y.portraitAlt")}
+          width="900"
+          height={ratio === "3/4" ? "1200" : "1125"}
+          loading={eager ? "eager" : "lazy"}
+          fetchpriority={eager ? "high" : undefined}
+          decoding="async"
+          class="h-full w-full object-cover"
+        />
+      </picture>
+    ) : (
+      <div class="absolute inset-0 grid place-items-center" aria-hidden="true">
+        {/*
+          An oversized copy of the mark's arc, cropped by the panel. Same geometry
+          as EyeMark, scaled up so the panel reads as brand furniture rather than
+          an empty frame.
+
+          The first version of this plate was too faint to register - a pale mark
+          floating on pale sand read as an image that had failed to load. The arc
+          now carries real weight, the disc behind the mark is solid rather than
+          translucent, and the caption sits in bronze at reading size. It should
+          look like a chosen graphic, not a gap.
+        */}
+        <svg
+          viewBox="0 0 64 64"
+          fill="none"
+          class="absolute -inset-[22%] h-[144%] w-[144%] opacity-40"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M54.55 40.21 A 24 24 0 1 1 54.55 23.79"
+            stroke="var(--color-bronze)"
+            stroke-width="0.55"
+            stroke-linecap="round"
+          />
+        </svg>
+
+        {/* A true circle: sized by width with a square ratio, since percentage
+            height and width on a 3:4 plate drew a tall oval. No caption - the
+            hero's floating badge already names the centre directly above. */}
+        <span class="absolute aspect-square w-[62%] rounded-full bg-cream" />
+
+        <span class="relative">
+          <EyeMark size={92} tone="duo" />
+        </span>
+      </div>
+    )
+  }
+</div>

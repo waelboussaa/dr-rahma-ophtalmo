@@ -1,0 +1,111 @@
+---
+import { Phone, MessageCircle, ArrowUpRight } from "@lucide/astro";
+import { telHref, whatsappHref, medtnHref } from "../../lib/links";
+import { makeT, type Locale } from "../../lib/i18n";
+
+/**
+ * The mobile conversion dock.
+ *
+ * Two rules decide its behaviour, and both come from the brief's warning that it
+ * must stay visible "without covering important content":
+ *
+ *   1. It appears only once the hero has scrolled away, so the hero's own CTA is
+ *      never competing with a duplicate of itself.
+ *   2. It hides again over the booking section and the footer. A fixed bar that
+ *      sits on top of the very button it duplicates is the classic version of
+ *      this pattern done badly.
+ *
+ * Safe-area padding keeps it clear of the iOS home indicator; targets are 56px.
+ */
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = makeT(locale);
+---
+
+<div
+  id="sticky-dock"
+  class="no-print pointer-events-none fixed inset-x-0 bottom-0 z-40 translate-y-full opacity-0 transition-[transform,opacity] duration-300 ease-out lg:hidden"
+  data-dock
+>
+  <div
+    class="pointer-events-auto border-t border-line bg-cream/95 px-3 pt-3 backdrop-blur-lg"
+    style="padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));"
+  >
+    <nav class="flex items-center gap-2.5" aria-label={t("a11y.quickActions")}>
+      <a
+        href={medtnHref}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn btn-primary min-h-14 flex-1 whitespace-nowrap !px-4 text-[0.92rem]"
+      >
+        {t("cta.book")}
+        <ArrowUpRight size={17} aria-hidden="true" class="rtl:-scale-x-100" />
+        <span class="sr-only">({t("a11y.newTab")})</span>
+      </a>
+      <a
+        href={telHref}
+        class="btn btn-ghost min-h-14 w-14 shrink-0 !px-0 bg-surface"
+        aria-label={t("cta.call")}
+      >
+        <Phone size={19} aria-hidden="true" />
+      </a>
+      <a
+        href={whatsappHref(t("wa.message"))}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn btn-ghost min-h-14 w-14 shrink-0 !px-0 bg-surface"
+        aria-label={t("cta.whatsapp")}
+      >
+        <MessageCircle size={19} aria-hidden="true" />
+      </a>
+    </nav>
+  </div>
+</div>
+
+<script>
+  const dock = document.querySelector<HTMLElement>("[data-dock]");
+  const hero = document.getElementById("hero");
+  const booking = document.getElementById("rendez-vous");
+  const footer = document.querySelector("footer");
+
+  if (dock && hero) {
+    let heroVisible = true;
+    let blocked = false;
+
+    const apply = () => {
+      const show = !heroVisible && !blocked;
+      dock.classList.toggle("translate-y-full", !show);
+      dock.classList.toggle("opacity-0", !show);
+    };
+
+    new IntersectionObserver(
+      ([entry]) => {
+        heroVisible = entry.isIntersecting;
+        apply();
+      },
+      { rootMargin: "-40% 0px 0px 0px" },
+    ).observe(hero);
+
+    // The booking band and the footer own the conversion at the end of the page;
+    // the dock steps out of their way rather than sitting on top of them.
+    const blockers = [booking, footer].filter((el): el is HTMLElement => Boolean(el));
+    if (blockers.length) {
+      const seen = new Set<Element>();
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) seen.add(entry.target);
+            else seen.delete(entry.target);
+          }
+          blocked = seen.size > 0;
+          apply();
+        },
+        { threshold: 0.05 },
+      );
+      blockers.forEach((el) => observer.observe(el));
+    }
+  }
+</script>

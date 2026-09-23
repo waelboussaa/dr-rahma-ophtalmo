@@ -1,0 +1,13 @@
+---
+import Base from "../layouts/Base.astro";
+import HomeBody from "../components/site/HomeBody.astro";
+import { buildJsonLd } from "../lib/jsonld";
+
+// French is the default locale, so it has no path prefix.
+const locale = "fr" as const;
+const jsonLd = buildJsonLd(locale, Astro.site ?? new URL("http://localhost:4321"));
+---
+
+<Base locale={locale} jsonLd={jsonLd}>
+  <HomeBody locale={locale} />
+</Base>

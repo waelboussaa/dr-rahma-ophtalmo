@@ -1,0 +1,13 @@
+---
+import Base from "../../layouts/Base.astro";
+import HomeBody from "../../components/site/HomeBody.astro";
+import { buildJsonLd } from "../../lib/jsonld";
+
+// Arabic: same structure, true RTL, its own authored copy.
+const locale = "ar" as const;
+const jsonLd = buildJsonLd(locale, Astro.site ?? new URL("http://localhost:4321"));
+---
+
+<Base locale={locale} jsonLd={jsonLd}>
+  <HomeBody locale={locale} />
+</Base>
